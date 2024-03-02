@@ -3,10 +3,90 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
+			rel="stylesheet" />
+		<link rel="stylesheet" href="style.css" />
 		<script src="script.js" defer></script>
 		<title>Tic-Tac-Toe | Game</title>
 	</head>
+
 	<body>
-		<h1>Tic-Tac-Toe</h1>
+		<!-- Welcome Screen -->
+		<section id="welcome-screen" class="welcome-screen screens-layout">
+			<h1>
+				Welcome at <br />
+				Tic-Tac-Toe
+			</h1>
+			<button id="welcome-btn" class="standard-btn">Play Game</button>
+		</section>
+
+		<!-- Select Players Screen -->
+		<section
+			id="select-players-screen"
+			class="select-players-screen screens-layout hide">
+			<h2>Select Players</h2>
+			<div class="cards-wrapper">
+				<div class="player-card">
+					<h3>Player One</h3>
+					<p class="player-sign">X</p>
+					<form id="player-form" action="#" method="post">
+						<label for="name">Name</label>
+						<input
+							type="text"
+							id="name"
+							name="name"
+							placeholder="Arthur"
+							required
+							minlength="4"
+							maxlength="16" />
+						<button class="standard-btn">Select</button>
+					</form>
+				</div>
+				<div class="player-card">
+					<h3>Player Two</h3>
+					<p class="player-sign">O</p>
+					<form id="player-form" action="#" method="post">
+						<label for="name">Name</label>
+						<input
+							type="text"
+							id="name"
+							name="name"
+							placeholder="Sadie"
+							required
+							minlength="4"
+							maxlength="16" />
+						<button class="standard-btn">Select</button>
+					</form>
+				</div>
+			</div>
+		</section>
+
+		<!-- Game Screen -->
+		<section id="game-screen" class="screens-layout hide">
+			<h2 id="player-turn-text">Sadie's Turn</h2>
+			<div id="game-board" class="game-board x">
+				<button class="board-cell x" data-cell="0"></button>
+				<button class="board-cell circle" data-cell="1"></button>
+				<button class="board-cell" data-cell="2"></button>
+				<button class="board-cell" data-cell="3"></button>
+				<button class="board-cell" data-cell="4"></button>
+				<button class="board-cell" data-cell="5"></button>
+				<button class="board-cell" data-cell="6"></button>
+				<button class="board-cell" data-cell="7"></button>
+				<button class="board-cell" data-cell="8"></button>
+			</div>
+		</section>
+
+		<!-- End Game Modal -->
+		<dialog id="end-game-modal" class="end-game-modal">
+			<h2 id="winner-text">Sadie Won!</h2>
+			<div class="btns-wrapper">
+				<button id="play-again-btn" class="standard-btn">Play Again</button>
+				<button id="restart-game-btn" class="standard-btn">Restart Game</button>
+			</div>
+		</dialog>
 	</body>
 </html>
