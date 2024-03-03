@@ -311,10 +311,19 @@ const screenController = (function () {
 	const gameBoardEl = document.querySelector("#game-board");
 	// End Game Section
 	const winnerText = document.querySelector("#winner-text");
+	const playAgainBtn = document.querySelector("#play-again-btn");
+	const restartGameBtn = document.querySelector("#restart-game-btn");
 
 	let playerOneName = "";
 	let playerTwoName = "";
 	let game;
+
+	function playAgain() {
+		console.log("play again");
+		game.restartGame();
+		cleanTheBoard();
+		createSections.endGameModal.close();
+	}
 
 	function playGame() {
 		if (playerOneName !== "" && playerTwoName !== "") {
@@ -404,12 +413,23 @@ const screenController = (function () {
 		elementTwo.classList.toggle("hide");
 	}
 
+	function cleanTheBoard() {
+		const cells = document.querySelectorAll("button[data-cell]");
+		cells.forEach((cell) => {
+			cell.classList.remove("x", "circle");
+		});
+		gameBoardEl.classList.remove("circle");
+		gameBoardEl.classList.add("x");
+		playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
+	}
+
 	// --Event Listeners--
 	welcomeBtn.addEventListener("click", handleWelcomeBtn);
 	playerOneForm.addEventListener("submit", handlePlayerOneForm);
 	playerTwoForm.addEventListener("submit", handlePlayerTwoForm);
 	playGameBtn.addEventListener("click", playGame);
 	gameBoardEl.addEventListener("click", placeMarkerOnTheBoard);
+	playAgainBtn.addEventListener("click", playAgain);
 
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape" && createSections.endGameModal.open) {
