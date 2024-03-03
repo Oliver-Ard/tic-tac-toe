@@ -149,7 +149,6 @@ const createSections = (function () {
 		// H2
 		const h2 = document.createElement("h2");
 		h2.setAttribute("id", "player-turn-text");
-		h2.textContent = "Sadie's Turn";
 		gameSection.append(h2);
 
 		// Game Board
@@ -171,7 +170,6 @@ const createSections = (function () {
 		// H2
 		const h2 = document.createElement("h2");
 		h2.setAttribute("id", "winner-text");
-		h2.textContent = "Sadie Won!";
 		endGameModal.append(h2);
 
 		// Btns Wrapper
@@ -194,10 +192,15 @@ const createSections = (function () {
 
 		endGameModal.append(btnsWrapper);
 	}
-	createWelcomeSection();
-	createSelectPlayersSection();
-	createGameSection();
-	createEndGameModal();
+
+	function renderSections() {
+		createWelcomeSection();
+		createSelectPlayersSection();
+		createGameSection();
+		createEndGameModal();
+	}
+
+	renderSections();
 
 	return {
 		welcomeSection,
@@ -231,15 +234,11 @@ function GameController(firstPlayer, secondPlayer) {
 	function placeMarker(cellIndex) {
 		if (board[cellIndex] !== "" || !running) {
 			return;
+		} else {
+			board[cellIndex] = currentPlayer.getPlayerMark();
 		}
-
-		updateCell(cellIndex);
-		checkWinner();
-	}
-
-	function updateCell(index) {
-		board[index] = currentPlayer.getPlayerMark();
 		gameBoard.displayBoard();
+		checkWinner();
 	}
 
 	function switchPlayerTurn() {
@@ -266,17 +265,9 @@ function GameController(firstPlayer, secondPlayer) {
 		}
 
 		if (roundWon) {
-			console.log(
-				`${
-					currentPlayer === playerOne
-						? playerOne.getPlayerName()
-						: playerTwo.getPlayerName()
-				} won!!!`
-			);
 			running = false;
 		} else if (!board.includes("")) {
-			console.log("Draw!");
-			running = false;
+			running = "draw";
 		} else {
 			switchPlayerTurn();
 		}
@@ -285,7 +276,6 @@ function GameController(firstPlayer, secondPlayer) {
 	function restartGame() {
 		currentPlayer = playerOne;
 		board = gameBoard.resetBoard();
-		initGame();
 		running = true;
 	}
 
@@ -293,28 +283,15 @@ function GameController(firstPlayer, secondPlayer) {
 		return currentPlayer.getPlayerName();
 	}
 
-	function getCurrentPlayerMark() {
-		return currentPlayer.getPlayerMark();
+	function getGameStatus() {
+		return running;
 	}
-
-	function initGame() {
-		gameBoard.displayBoard();
-		if (currentPlayer === playerOne) {
-			console.log(`Is ${playerOne.getPlayerName()}'s turn`);
-		} else {
-			console.log(`Is ${playerTwo.getPlayerName()}'s turn`);
-		}
-	}
-
-	initGame();
 
 	return {
 		placeMarker,
-		switchPlayerTurn,
-		checkWinner,
 		getCurrentPlayerName,
-		getCurrentPlayerMark,
 		restartGame,
+		getGameStatus,
 	};
 }
 
@@ -327,12 +304,13 @@ const screenController = (function () {
 	const playerTwoForm = document.querySelector("#player-two-form");
 	const playerOneInput = document.querySelector("#player-one-name");
 	const playerTwoInput = document.querySelector("#player-two-name");
-	const playGameBtn = document.querySelector("#play-game-btn");
 	const selectPlayersText = document.querySelector("#select-players-text");
+	const playGameBtn = document.querySelector("#play-game-btn");
 	// Game Section
 	const playerTurnText = document.querySelector("#player-turn-text");
 	const gameBoardEl = document.querySelector("#game-board");
 	// End Game Section
+	const winnerText = document.querySelector("#winner-text");
 
 	let playerOneName = "";
 	let playerTwoName = "";
@@ -344,6 +322,7 @@ const screenController = (function () {
 				Player(playerOneName, "X"),
 				Player(playerTwoName, "O")
 			);
+
 			selectPlayersText.classList.remove("select-players-text");
 			switchSections(
 				createSections.selectPlayersSection,
@@ -353,6 +332,42 @@ const screenController = (function () {
 			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
 		} else {
 			selectPlayersText.classList.add("select-players-text");
+		}
+	}
+
+	function placeMarkerOnTheBoard(e) {
+		const targetEl = e.target;
+
+		if (
+			game.getCurrentPlayerName() === playerOneName &&
+			!targetEl.className.includes("circle")
+		) {
+			game.placeMarker(targetEl.dataset.cell);
+			targetEl.classList.add("x");
+			gameBoardEl.classList.remove("x");
+			gameBoardEl.classList.add("circle");
+			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
+		} else if (
+			game.getCurrentPlayerName() === playerTwoName &&
+			!targetEl.className.includes("x")
+		) {
+			game.placeMarker(targetEl.dataset.cell);
+			targetEl.classList.add("circle");
+			gameBoardEl.classList.remove("circle");
+			gameBoardEl.classList.add("x");
+			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
+		}
+
+		openEndGameModal();
+	}
+
+	function openEndGameModal() {
+		if (!game.getGameStatus()) {
+			createSections.endGameModal.showModal();
+			winnerText.textContent = `${game.getCurrentPlayerName()} Won!`;
+		} else if (game.getGameStatus() === "draw") {
+			createSections.endGameModal.showModal();
+			winnerText.textContent = "It's a draw!";
 		}
 	}
 
@@ -375,8 +390,6 @@ const screenController = (function () {
 		handleFormInput(playerOneInput);
 		playerOneName = playerOneInput.value;
 		playerTwoInput.focus();
-
-		console.log(playerOneName);
 	}
 
 	function handlePlayerTwoForm(e) {
@@ -384,8 +397,6 @@ const screenController = (function () {
 		handleFormInput(playerTwoInput);
 		playerTwoName = playerTwoInput.value;
 		playGameBtn.focus();
-
-		console.log(playerTwoName);
 	}
 
 	function switchSections(elementOne, elementTwo) {
@@ -398,13 +409,11 @@ const screenController = (function () {
 	playerOneForm.addEventListener("submit", handlePlayerOneForm);
 	playerTwoForm.addEventListener("submit", handlePlayerTwoForm);
 	playGameBtn.addEventListener("click", playGame);
-	// document.addEventListener("click", () => {
-	// 	createSections.endGameModal.showModal();
-	// });
+	gameBoardEl.addEventListener("click", placeMarkerOnTheBoard);
 
-	// document.addEventListener("keydown", (e) => {
-	// 	if (e.key === "Escape" && createSections.endGameModal.open) {
-	// 		e.preventDefault();
-	// 	}
-	// });
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && createSections.endGameModal.open) {
+			e.preventDefault();
+		}
+	});
 })();
