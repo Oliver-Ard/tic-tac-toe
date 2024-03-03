@@ -131,7 +131,7 @@ const createSections = (function () {
 		input.setAttribute("name", "name");
 		input.setAttribute("placeholder", placeholderText);
 		input.setAttribute("required", "");
-		input.setAttribute("minlength", "4");
+		input.setAttribute("minlength", "3");
 		input.setAttribute("maxlength", "16");
 		form.append(input);
 		// Form Btn
@@ -384,6 +384,10 @@ const screenController = (function () {
 		playerOneInput.value = "";
 		playerTwoInput.disabled = false;
 		playerTwoInput.value = "";
+		playerOneName = "";
+		playerTwoName = "";
+		selectPlayersText.textContent = "Select Players";
+
 		playAgain();
 		switchSections(
 			createSections.gameSection,
@@ -407,6 +411,7 @@ const screenController = (function () {
 
 	function handlePlayerOneForm(e) {
 		e.preventDefault();
+
 		handleFormInput(playerOneInput);
 		playerOneName = playerOneInput.value;
 		playerTwoInput.focus();
@@ -414,9 +419,17 @@ const screenController = (function () {
 
 	function handlePlayerTwoForm(e) {
 		e.preventDefault();
-		handleFormInput(playerTwoInput);
-		playerTwoName = playerTwoInput.value;
-		playGameBtn.focus();
+
+		if (playerTwoInput.value !== playerOneInput.value) {
+			handleFormInput(playerTwoInput);
+			playerTwoName = playerTwoInput.value;
+			selectPlayersText.textContent = "You can play now";
+			selectPlayersText.classList.remove("select-players-text");
+			playGameBtn.focus();
+		} else {
+			selectPlayersText.textContent = "Please select another name";
+			selectPlayersText.classList.add("select-players-text");
+		}
 	}
 
 	function switchSections(elementOne, elementTwo) {
