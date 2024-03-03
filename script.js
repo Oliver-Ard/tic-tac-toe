@@ -318,13 +318,6 @@ const screenController = (function () {
 	let playerTwoName = "";
 	let game;
 
-	function playAgain() {
-		console.log("play again");
-		game.restartGame();
-		cleanTheBoard();
-		createSections.endGameModal.close();
-	}
-
 	function playGame() {
 		if (playerOneName !== "" && playerTwoName !== "") {
 			game = GameController(
@@ -380,6 +373,24 @@ const screenController = (function () {
 		}
 	}
 
+	function playAgain() {
+		game.restartGame();
+		cleanTheBoard();
+		createSections.endGameModal.close();
+	}
+
+	function restartGame() {
+		playerOneInput.disabled = false;
+		playerOneInput.value = "";
+		playerTwoInput.disabled = false;
+		playerTwoInput.value = "";
+		playAgain();
+		switchSections(
+			createSections.gameSection,
+			createSections.selectPlayersSection
+		);
+	}
+
 	// --Helper Functions--
 	function handleWelcomeBtn() {
 		switchSections(
@@ -430,7 +441,7 @@ const screenController = (function () {
 	playGameBtn.addEventListener("click", playGame);
 	gameBoardEl.addEventListener("click", placeMarkerOnTheBoard);
 	playAgainBtn.addEventListener("click", playAgain);
-
+	restartGameBtn.addEventListener("click", restartGame);
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape" && createSections.endGameModal.open) {
 			e.preventDefault();
