@@ -1,3 +1,4 @@
+// --Board Object--
 const gameBoard = (function () {
 	let board = ["", "", "", "", "", "", "", "", ""];
 
@@ -9,16 +10,11 @@ const gameBoard = (function () {
 		return board;
 	}
 
-	function displayBoard() {
-		console.log(`${board[0]} | ${board[1]} | ${board[2]}`);
-		console.log(`${board[3]} | ${board[4]} | ${board[5]}`);
-		console.log(`${board[6]} | ${board[7]} | ${board[8]}`);
-	}
-
-	return { getBoard, resetBoard, displayBoard };
+	return { getBoard, resetBoard };
 })();
 
-function Player(playerName, playerMarker) {
+// --Player Object--
+function player(playerName, playerMarker) {
 	function getPlayerName() {
 		return playerName;
 	}
@@ -30,7 +26,90 @@ function Player(playerName, playerMarker) {
 	return { getPlayerName, getPlayerMark };
 }
 
-const createSections = (function () {
+// --Game Controller Object--
+function gameController(firstPlayer, secondPlayer) {
+	let board = gameBoard.getBoard();
+	const playerOne = firstPlayer;
+	const playerTwo = secondPlayer;
+	const winConditions = [
+		[0, 1, 2],
+		[3, 4, 5],
+		[6, 7, 8],
+		[0, 3, 6],
+		[1, 4, 7],
+		[2, 5, 8],
+		[0, 4, 8],
+		[2, 4, 6],
+	];
+	let currentPlayer = playerOne;
+	let running = true;
+
+	function placeMarker(cellIndex) {
+		if (board[cellIndex] !== "" || !running) {
+			return;
+		} else {
+			board[cellIndex] = currentPlayer.getPlayerMark();
+		}
+		checkWinner();
+	}
+
+	function checkWinner() {
+		let roundWon = false;
+
+		// Check the winning conditions
+		for (let i = 0; i < winConditions.length; i++) {
+			const condition = winConditions[i];
+			const cellA = board[condition[0]];
+			const cellB = board[condition[1]];
+			const cellC = board[condition[2]];
+
+			if (cellA === "" || cellB === "" || cellC === "") {
+				continue;
+			}
+
+			if (cellA === cellB && cellB === cellC) {
+				roundWon = true;
+				break;
+			}
+		}
+
+		if (roundWon) {
+			running = false;
+		} else if (!board.includes("")) {
+			running = "draw";
+		} else {
+			switchPlayerTurn();
+		}
+	}
+
+	function switchPlayerTurn() {
+		currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
+	}
+
+	function resetGame() {
+		currentPlayer = playerOne;
+		board = gameBoard.resetBoard();
+		running = true;
+	}
+
+	function getCurrentPlayerName() {
+		return currentPlayer.getPlayerName();
+	}
+
+	function getGameStatus() {
+		return running;
+	}
+
+	return {
+		placeMarker,
+		getCurrentPlayerName,
+		getGameStatus,
+		resetGame,
+	};
+}
+
+// --Display Sections Object--
+const displaySections = (function () {
 	const welcomeSection = document.querySelector("#welcome-screen");
 	const selectPlayersSection = document.querySelector("#select-players-screen");
 	const gameSection = document.querySelector("#game-screen");
@@ -207,95 +286,10 @@ const createSections = (function () {
 		selectPlayersSection,
 		gameSection,
 		endGameModal,
-		createWelcomeSection,
-		createSelectPlayersSection,
-		createGameSection,
-		createEndGameModal,
 	};
 })();
 
-function GameController(firstPlayer, secondPlayer) {
-	let board = gameBoard.getBoard();
-	const playerOne = firstPlayer;
-	const playerTwo = secondPlayer;
-	const winConditions = [
-		[0, 1, 2],
-		[3, 4, 5],
-		[6, 7, 8],
-		[0, 3, 6],
-		[1, 4, 7],
-		[2, 5, 8],
-		[0, 4, 8],
-		[2, 4, 6],
-	];
-	let currentPlayer = playerOne;
-	let running = true;
-
-	function placeMarker(cellIndex) {
-		if (board[cellIndex] !== "" || !running) {
-			return;
-		} else {
-			board[cellIndex] = currentPlayer.getPlayerMark();
-		}
-		gameBoard.displayBoard();
-		checkWinner();
-	}
-
-	function switchPlayerTurn() {
-		currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
-	}
-
-	function checkWinner() {
-		let roundWon = false;
-
-		for (let i = 0; i < winConditions.length; i++) {
-			const condition = winConditions[i];
-			const cellA = board[condition[0]];
-			const cellB = board[condition[1]];
-			const cellC = board[condition[2]];
-
-			if (cellA === "" || cellB === "" || cellC === "") {
-				continue;
-			}
-
-			if (cellA === cellB && cellB === cellC) {
-				roundWon = true;
-				break;
-			}
-		}
-
-		if (roundWon) {
-			running = false;
-		} else if (!board.includes("")) {
-			running = "draw";
-		} else {
-			switchPlayerTurn();
-		}
-	}
-
-	function restartGame() {
-		currentPlayer = playerOne;
-		board = gameBoard.resetBoard();
-		running = true;
-	}
-
-	function getCurrentPlayerName() {
-		return currentPlayer.getPlayerName();
-	}
-
-	function getGameStatus() {
-		return running;
-	}
-
-	return {
-		placeMarker,
-		getCurrentPlayerName,
-		restartGame,
-		getGameStatus,
-	};
-}
-
-// Screen Controller
+// --Screen Controller Object--
 const screenController = (function () {
 	// Welcome Section
 	const welcomeBtn = document.querySelector("#welcome-btn");
@@ -320,19 +314,20 @@ const screenController = (function () {
 
 	function playGame() {
 		if (playerOneName !== "" && playerTwoName !== "") {
-			game = GameController(
-				Player(playerOneName, "X"),
-				Player(playerTwoName, "O")
+			game = gameController(
+				player(playerOneName, "X"),
+				player(playerTwoName, "O")
 			);
 
 			selectPlayersText.classList.remove("select-players-text");
 			switchSections(
-				createSections.selectPlayersSection,
-				createSections.gameSection
+				displaySections.selectPlayersSection,
+				displaySections.gameSection
 			);
 
 			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
 		} else {
+			// Highlight to the player that the players must be selected first before playing
 			selectPlayersText.classList.add("select-players-text");
 		}
 	}
@@ -346,6 +341,7 @@ const screenController = (function () {
 		) {
 			game.placeMarker(targetEl.dataset.cell);
 			targetEl.classList.add("x");
+			// This classes are for the hover effect of the marks
 			gameBoardEl.classList.remove("x");
 			gameBoardEl.classList.add("circle");
 			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
@@ -364,19 +360,30 @@ const screenController = (function () {
 	}
 
 	function openEndGameModal() {
+		// This conditions is for checking when the game ended
 		if (!game.getGameStatus()) {
-			createSections.endGameModal.showModal();
+			displaySections.endGameModal.showModal();
 			winnerText.textContent = `${game.getCurrentPlayerName()} Won!`;
 		} else if (game.getGameStatus() === "draw") {
-			createSections.endGameModal.showModal();
+			displaySections.endGameModal.showModal();
 			winnerText.textContent = "It's a draw!";
 		}
 	}
 
+	function cleanTheBoard() {
+		const cells = document.querySelectorAll("button[data-cell]");
+		cells.forEach((cell) => {
+			cell.classList.remove("x", "circle");
+		});
+		gameBoardEl.classList.remove("circle");
+		gameBoardEl.classList.add("x");
+		playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
+	}
+
 	function playAgain() {
-		game.restartGame();
+		game.resetGame();
 		cleanTheBoard();
-		createSections.endGameModal.close();
+		displaySections.endGameModal.close();
 	}
 
 	function restartGame() {
@@ -390,16 +397,16 @@ const screenController = (function () {
 
 		playAgain();
 		switchSections(
-			createSections.gameSection,
-			createSections.selectPlayersSection
+			displaySections.gameSection,
+			displaySections.selectPlayersSection
 		);
 	}
 
 	// --Helper Functions--
 	function handleWelcomeBtn() {
 		switchSections(
-			createSections.welcomeSection,
-			createSections.selectPlayersSection
+			displaySections.welcomeSection,
+			displaySections.selectPlayersSection
 		);
 	}
 
@@ -437,14 +444,10 @@ const screenController = (function () {
 		elementTwo.classList.toggle("hide");
 	}
 
-	function cleanTheBoard() {
-		const cells = document.querySelectorAll("button[data-cell]");
-		cells.forEach((cell) => {
-			cell.classList.remove("x", "circle");
-		});
-		gameBoardEl.classList.remove("circle");
-		gameBoardEl.classList.add("x");
-		playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
+	function preventModalClosing(e) {
+		if (e.key === "Escape" && displaySections.endGameModal.open) {
+			e.preventDefault();
+		}
 	}
 
 	// --Event Listeners--
@@ -455,9 +458,5 @@ const screenController = (function () {
 	gameBoardEl.addEventListener("click", placeMarkerOnTheBoard);
 	playAgainBtn.addEventListener("click", playAgain);
 	restartGameBtn.addEventListener("click", restartGame);
-	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape" && createSections.endGameModal.open) {
-			e.preventDefault();
-		}
-	});
+	document.addEventListener("keydown", preventModalClosing);
 })();

@@ -19,7 +19,6 @@
 	--clr-accent: #efdb02;
 	--clr-dark: #1b1818;
 	--clr-light: #fff;
-	--clr-grey: #787878;
 	--clr-red: #d31414;
 	--clr-green: #5bbf1d;
 	--clr-overlay: rgb(0, 0, 0, 0.6);
@@ -227,9 +226,9 @@ ul {
 
 /* --Board Cells-- */
 .game-board .board-cell {
+	cursor: pointer;
 	width: clamp(5rem, 20vw + 1rem, 10rem);
 	height: clamp(5rem, 20vw + 1rem, 10rem);
-	cursor: pointer;
 	font-size: var(--font-size-900);
 	background: transparent;
 	border: 1px solid var(--clr-dark);
@@ -371,7 +370,7 @@ ul {
 	background: var(--clr-primary-3);
 }
 
-/* JS Classes */
+/* JS ClASSES */
 .hide {
 	display: none;
 }
