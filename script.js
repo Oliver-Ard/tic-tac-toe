@@ -328,6 +328,7 @@ const screenController = (function () {
 			playerTurnText.textContent = `${game.getCurrentPlayerName()}'s Turn`;
 		} else {
 			// Highlight to the player that the players must be selected first before playing
+			selectPlayersText.textContent = "Select Players";
 			selectPlayersText.classList.add("select-players-text");
 		}
 	}
@@ -421,13 +422,18 @@ const screenController = (function () {
 
 		handleFormInput(playerOneInput);
 		playerOneName = playerOneInput.value;
+		selectPlayersText.textContent = "Select Players";
+		selectPlayersText.classList.remove("select-players-text");
 		playerTwoInput.focus();
 	}
 
 	function handlePlayerTwoForm(e) {
 		e.preventDefault();
 
-		if (playerTwoInput.value !== playerOneInput.value) {
+		if (playerOneInput.value === "") {
+			selectPlayersText.textContent = "Select Player One First";
+			selectPlayersText.classList.add("select-players-text");
+		} else if (playerTwoInput.value !== playerOneInput.value) {
 			handleFormInput(playerTwoInput);
 			playerTwoName = playerTwoInput.value;
 			selectPlayersText.textContent = "You can play now";
